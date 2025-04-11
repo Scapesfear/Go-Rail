@@ -1,0 +1,128 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #1a2980, #26d0ce);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 900px;
+    text-align: center;
+  }
+  
+  .header {
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.8s ease-out;
+  }
+  
+  .header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .header p {
+    font-size: 1.2rem;
+    font-weight: 300;
+    opacity: 0.9;
+  }
+  
+  .role-options {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .role-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 2rem;
+    width: 300px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: fadeInUp 0.8s ease-out;
+  }
+  
+  .role-card:hover {
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  }
+  
+  .role-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .role-card h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+  }
+  
+  .role-card p {
+    font-size: 1rem;
+    font-weight: 300;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+  
+  /* Animations */
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .header h1 {
+      font-size: 2rem;
+    }
+    
+    .header p {
+      font-size: 1rem;
+    }
+    
+    .role-options {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .role-card {
+      width: 100%;
+      max-width: 350px;
+    }
+  }
