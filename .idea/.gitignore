@@ -8,3 +8,4 @@
 /dataSources.local.xml
 backend/.env
 node_modules/
+.env
