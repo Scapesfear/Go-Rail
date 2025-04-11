@@ -15,11 +15,15 @@ app.use(bodyParser.json());
 // Import your route handlers
 const loginRoutes = require('./login');
 const signupRoutes = require('./signup');
+const bookingsRoutes = require('./bookings'); // ✅ exact filename
+     // ✅ mounts the route correctly
+
 
 // Use the routes
 // app.post('/login', loginRoutes); //When request is made to /login loginRoutes handles it
 app.use('/login', loginRoutes);
 app.use('/signup', signupRoutes);
+app.use('/bookings', bookingsRoutes);    
 
 // Start the server
 app.listen(PORT, () => {
