@@ -1,10 +1,11 @@
+<!-- login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Passenger Authentication - GoRail</title>
-  <link rel="stylesheet" href="login.css">
+  <title>Authentication - GoRail</title>
+  <link rel="stylesheet" href="login.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -12,30 +13,30 @@
   <div class="container">
     <div class="auth-container">
       <div class="header">
-        <h1>Welcome Passenger</h1>
-        <p>Sign in or create an account to continue</p>
+        <h1 id="welcomeText">Welcome</h1>
+        <p id="descriptionText">Sign in or create an account to continue</p>
       </div>
-      
-      <div class="toggle-buttons">
+
+      <div class="toggle-buttons" id="toggleSection">
         <button class="toggle-btn active" id="loginBtn">Login</button>
         <button class="toggle-btn" id="signupBtn">Sign Up</button>
       </div>
-      
+
       <div class="form-container">
         <!-- Login Form -->
         <form id="loginForm" class="auth-form active">
-          <div class="input-group">
+          <div class="input-group" id="loginInput1">
             <i class="fas fa-phone"></i>
-            <input type="tel" placeholder="Contact Number" required>
+            <input type="text" placeholder="Contact Number" id="loginIdentifier" required>
           </div>
           <div class="input-group">
             <i class="fas fa-lock"></i>
-            <input type="password" placeholder="Password" required>
+            <input type="password" placeholder="Password" id="loginPassword" required>
           </div>
           <button type="submit" class="submit-btn">Login</button>
           <p class="forgot-password">Forgot Password?</p>
         </form>
-        
+
         <!-- Signup Form -->
         <form id="signupForm" class="auth-form">
           <div class="input-group">
@@ -65,13 +66,25 @@
   </div>
 
   <script>
-    // Get role from URL (default to 'Passenger')
-    const urlParams = new URLSearchParams(window.location.search);
-    const role = urlParams.get('role') || 'Passenger';
-    document.querySelector('.header h1').textContent = `Welcome ${role}`;
-    document.querySelector('.header p').textContent = `Sign in as ${role} to continue`;
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role') || 'Passenger';
 
-    // Toggle between login and signup forms
+    const welcomeText = document.getElementById('welcomeText');
+    const descriptionText = document.getElementById('descriptionText');
+    const toggleSection = document.getElementById('toggleSection');
+    const loginInput1 = document.getElementById('loginInput1');
+    const loginIdentifier = document.getElementById('loginIdentifier');
+
+    if (role === 'Admin') {
+      welcomeText.textContent = 'Welcome Admin';
+      descriptionText.textContent = 'Login with your admin credentials';
+      toggleSection.style.display = 'none';
+      loginIdentifier.placeholder = 'Login Name';
+    } else {
+      welcomeText.textContent = 'Welcome Passenger';
+      descriptionText.textContent = 'Sign in or create an account to continue';
+    }
+
     const loginBtn = document.getElementById('loginBtn');
     const signupBtn = document.getElementById('signupBtn');
     const loginForm = document.getElementById('loginForm');
@@ -91,56 +104,51 @@
       loginForm.classList.remove('active');
     });
 
-    // Handle login form submission
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const contact = e.target.querySelector('input[type="tel"]').value;
-      const password = e.target.querySelector('input[type="password"]').value;
+      const identifier = loginIdentifier.value;
+      const password = document.getElementById('loginPassword').value;
+
+      const payload = (role === 'Admin')
+        ? { loginName: identifier, password, role: 'Admin' }
+        : { contact: identifier, password, role: 'Passenger' };
 
       try {
         const response = await fetch('http://localhost:3001/login', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ contact, password, role })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const data = await response.json();
         if (data.success) {
           localStorage.setItem("userName", data.user.LoginName);
           localStorage.setItem("loginID", data.user.LoginID);
-
           alert('Login successful!');
-          if (role === 'Admin') {
-            window.location.href = 'admin_homescreen.html';
-          } else {
-            window.location.href = 'passenger_homescreen.html';
-          }
+          window.location.href = (role === 'Admin') ? 'admin_dashboard.html' : 'passenger_homescreen.html';
         } else {
           alert(data.message || 'Login failed');
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error during fetch:', error);
         alert(`Login Error: ${error.message || 'Unknown error occurred'}`);
       }
     });
 
-    // Handle signup form submission
     document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = e.target.querySelector('input[type="text"]').value;
       const contact = e.target.querySelectorAll('input[type="tel"]')[0].value;
       const email = e.target.querySelector('input[type="email"]').value;
       const password = e.target.querySelectorAll('input[type="password"]')[0].value;
-      const userType = role; // now dynamic
+      const userType = 'Passenger';
 
       try {
         const response = await fetch('http://localhost:3001/signup', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, password, contact, email, userType })
         });
 
@@ -152,10 +160,10 @@
           alert(data.message || 'Signup failed');
         }
       } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred during signup');
+        console.error('Signup Error:', error);
+        alert('Signup error occurred');
       }
     });
-</script>
+  </script>
 </body>
 </html>
