@@ -65,6 +65,12 @@
   </div>
 
   <script>
+    // Get role from URL (default to 'Passenger')
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role') || 'Passenger';
+    document.querySelector('.header h1').textContent = `Welcome ${role}`;
+    document.querySelector('.header p').textContent = `Sign in as ${role} to continue`;
+
     // Toggle between login and signup forms
     const loginBtn = document.getElementById('loginBtn');
     const signupBtn = document.getElementById('signupBtn');
@@ -84,70 +90,72 @@
       signupForm.classList.add('active');
       loginForm.classList.remove('active');
     });
+
     // Handle login form submission
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const contact = e.target.querySelector('input[type="tel"]').value;
-    const password = e.target.querySelector('input[type="password"]').value;
-    console.log("hello");
-    try {
-      const response = await fetch('http://localhost:3001/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contact, password })
-      });
-      
-      const data = await response.json();
-      console.log("Hello");
-      if (data.success) {
-      // Save name in localStorage
-      localStorage.setItem("userName", data.user.LoginName);
-      localStorage.setItem("loginID", data.user.LoginID);
-      
-      alert('Login successful!');
-      window.location.href = 'passenger_homescreen.html';
-      } else {
-        alert(data.message || 'Login failed');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert(`Login Error: ${error.message || 'Unknown error occurred'}`);
-    }
-  });
+      e.preventDefault();
+      const contact = e.target.querySelector('input[type="tel"]').value;
+      const password = e.target.querySelector('input[type="password"]').value;
 
-  // Handle signup form submission
-  document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = e.target.querySelector('input[type="text"]').value;
-    const contact = e.target.querySelectorAll('input[type="tel"]')[0].value;
-    const email = e.target.querySelector('input[type="email"]').value;
-    const password = e.target.querySelectorAll('input[type="password"]')[0].value;
-    const userType = 'Passenger'; // Since this is the passenger page
-    
-    try {
-      const response = await fetch('http://localhost:3001/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, password, contact, email, userType })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        alert('Signup successful! Please login.');
-        // Switch to login form
-        document.getElementById('loginBtn').click();
-      } else {
-        alert(data.message || 'Signup failed');
+      try {
+        const response = await fetch('http://localhost:3001/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ contact, password, role })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          localStorage.setItem("userName", data.user.LoginName);
+          localStorage.setItem("loginID", data.user.LoginID);
+
+          alert('Login successful!');
+          if (role === 'Admin') {
+            window.location.href = 'admin_homescreen.html';
+          } else {
+            window.location.href = 'passenger_homescreen.html';
+          }
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert(`Login Error: ${error.message || 'Unknown error occurred'}`);
       }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred during signup');
-    }
-  });
-  </script>
+    });
+
+    // Handle signup form submission
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = e.target.querySelector('input[type="text"]').value;
+      const contact = e.target.querySelectorAll('input[type="tel"]')[0].value;
+      const email = e.target.querySelector('input[type="email"]').value;
+      const password = e.target.querySelectorAll('input[type="password"]')[0].value;
+      const userType = role; // now dynamic
+
+      try {
+        const response = await fetch('http://localhost:3001/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, password, contact, email, userType })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Signup successful! Please login.');
+          document.getElementById('loginBtn').click();
+        } else {
+          alert(data.message || 'Signup failed');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred during signup');
+      }
+    });
+</script>
 </body>
 </html>

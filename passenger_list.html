@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Passenger List</title>
+  <link rel="stylesheet" href="passenger_list.css" />
+</head>
+<body>
+  <h1>Passenger List</h1>
+
+  <div class="filters">
+    <input type="number" id="loginIdFilter" placeholder="Filter by Login ID" />
+    <input type="text" id="fromStation" placeholder="From Station Name" />
+    <input type="text" id="toStation" placeholder="To Station Name" />
+    <button onclick="loadPassengers(true)">Search</button>
+    <button onclick="sortByBookings()">Sort by Bookings</button> <!-- ✨ Add this -->
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th onclick="sortByBookings()">Login ID ⬍</th>
+        <th>Passenger ID</th>
+        <th>Name</th>
+        <th>Aadhar</th>
+        <th>Gender</th>
+        <th>Age</th>
+        <th>DOB</th>
+        <th>Train ID</th>
+        <th>Travel Date</th>
+      </tr>
+    </thead>
+    <tbody id="passengerTableBody"></tbody>
+  </table>
+
+  <script src="passenger_list.js"></script>
+</body>
+</html>

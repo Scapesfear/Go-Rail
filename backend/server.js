@@ -15,8 +15,10 @@ app.use(bodyParser.json());
 // Import your route handlers
 const loginRoutes = require('./login');
 const signupRoutes = require('./signup');
-const bookingsRoutes = require('./bookings'); // ✅ exact filename
-     // ✅ mounts the route correctly
+const bookingsRoutes = require('./bookings');
+const passengerRoutes = require('./passengers');
+
+
 
 
 // Use the routes
@@ -24,6 +26,7 @@ const bookingsRoutes = require('./bookings'); // ✅ exact filename
 app.use('/login', loginRoutes);
 app.use('/signup', signupRoutes);
 app.use('/bookings', bookingsRoutes);    
+app.use('/passengers', passengerRoutes);
 
 // New routes for booking page
 app.get('/stations', (req, res) => {
