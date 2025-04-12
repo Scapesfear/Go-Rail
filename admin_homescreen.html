@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoRail | Admin Dashboard</title>
+  <link rel="stylesheet" href="admin_homescreen.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-header">
+      <div class="logo">GoRail</div>
+      <div class="admin-greet" id="adminGreet">Welcome, Admin</div>
+    </div>
+
+    <div class="admin-content">
+      <h1>Admin Dashboard</h1>
+      <p>Select an option below to manage the system</p>
+
+      <div class="admin-actions">
+        <a href="passenger_list.html" class="admin-btn passengers-btn">
+          <i class="fas fa-users"></i>
+          <span>Manage Passengers</span>
+          <p>View and edit passenger details</p>
+        </a>
+        
+        <a href="booking_management.html" class="admin-btn bookings-btn">
+          <i class="fas fa-ticket-alt"></i>
+          <span>Manage Bookings</span>
+          <p>View all passenger bookings</p>
+        </a>
+        
+        <a href="transactions.html" class="admin-btn transactions-btn">
+          <i class="fas fa-money-bill-wave"></i>
+          <span>Transactions</span>
+          <p>Process payments and refunds</p>
+        </a>
+        
+        <a href="train_management.html" class="admin-btn trains-btn">
+          <i class="fas fa-train"></i>
+          <span>Manage Trains</span>
+          <p>View and modify train details</p>
+        </a>
+        
+        <a href="login.html" class="admin-btn logout-btn" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+          <p>Sign out of admin account</p>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      // Clear any admin session data
+      localStorage.removeItem('adminToken');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>
