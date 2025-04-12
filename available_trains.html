@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoRail | Available Trains</title>
+    <link rel="stylesheet" href="available_trains.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">GoRail</div>
+            <div class="user-greet" id="userGreet">Welcome back, Passenger</div>
+        </div>
+
+        <div class="main-content">
+            <div class="trains-container">
+                <h1>Available Trains</h1>
+                <div class="sort-options">
+                    <button id="sortPrice" class="sort-btn">
+                        <i class="fas fa-sort-amount-down"></i>
+                        Sort by Price
+                    </button>
+                </div>
+                <div class="trains-list" id="trainsList">
+                    <!-- Trains will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="available_trains.js"></script>
+</body>
+</html> 

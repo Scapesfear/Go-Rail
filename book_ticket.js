@@ -39,7 +39,15 @@ async function populateStations() {
 // Populate journey dates dropdown
 async function populateJourneyDates() {
     const dates = await fetchData('journey-dates');
-    populateDropdown('journeyDate', dates, 'TravelDate', 'TravelDate');
+    const select = document.getElementById('journeyDate');
+    select.innerHTML = '<option value="">Select Journey Date</option>';
+    
+    dates.forEach(date => {
+        const option = document.createElement('option');
+        option.value = date.TravelDate;
+        option.textContent = date.TravelDate;
+        select.appendChild(option);
+    });
 }
 
 // Populate coach classes dropdown
@@ -83,9 +91,13 @@ document.getElementById('showSeatsBtn').addEventListener('click', async () => {
         return;
     }
 
-    // Here you would typically make an API call to get available seats
-    // For now, we'll just show an alert
-    alert('Fetching available seats...');
+    // Get the selected station names
+    const sourceStationName = document.getElementById('sourceStation').options[document.getElementById('sourceStation').selectedIndex].text;
+    const destinationStationName = document.getElementById('destinationStation').options[document.getElementById('destinationStation').selectedIndex].text;
+    const coachClassName = document.getElementById('coachClass').options[document.getElementById('coachClass').selectedIndex].text;
+
+    // Redirect to available trains page with parameters
+    window.location.href = `available_trains.html?source=${encodeURIComponent(sourceStationName)}&destination=${encodeURIComponent(destinationStationName)}&date=${journeyDate}&coach=${encodeURIComponent(coachClassName)}&passengers=${passengerCount}`;
 });
 
 // Initialize the page

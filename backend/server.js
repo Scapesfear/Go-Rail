@@ -44,7 +44,11 @@ app.get('/journey-dates', (req, res) => {
             console.error('Error fetching journey dates:', err);
             return res.status(500).json({ error: 'Error fetching journey dates' });
         }
-        res.json(results);
+        // Format dates in JavaScript instead of SQL
+        const formattedResults = results.map(date => ({
+            TravelDate: new Date(date.TravelDate).toISOString().split('T')[0]
+        }));
+        res.json(formattedResults);
     });
 });
 
@@ -56,6 +60,87 @@ app.get('/coaches', (req, res) => {
             return res.status(500).json({ error: 'Error fetching coaches' });
         }
         res.json(results);
+    });
+});
+
+app.get('/available-trains', (req, res) => {
+    const { source, destination, date, coach, passengers } = req.query;
+    
+    const query = `
+        SELECT 
+            t.TrainID,
+            t.TrainName,
+            src.StationName AS SourceStation,
+            dest.StationName AS DestinationStation,
+            r_src.ArrivalTime AS DepartureTime,
+            r_dest.ArrivalTime AS ArrivalTime,
+            c.CoachName,
+            ta.Price,
+            ta.AvailableSeats
+        FROM Route r_src
+        JOIN Route r_dest ON r_src.TrainID = r_dest.TrainID
+        JOIN Train t ON r_src.TrainID = t.TrainID
+        JOIN Station src ON r_src.StationID = src.StationID
+        JOIN Station dest ON r_dest.StationID = dest.StationID
+        JOIN TrainAvailability ta ON r_src.TrainID = ta.TrainID AND ta.TravelDate = ?
+        JOIN Coach c ON ta.CoachID = c.CoachID AND c.CoachName = ?
+        WHERE 
+            src.StationName = ?
+            AND dest.StationName = ?
+            AND r_src.SequenceNumber < r_dest.SequenceNumber
+            AND ta.AvailableSeats >= ?
+        ORDER BY 
+            t.TrainName, c.CoachName
+    `;
+
+    db.query(query, [date, coach, source, destination, passengers], (err, results) => {
+        if (err) {
+            console.error('Error fetching available trains:', err);
+            return res.status(500).json({ error: 'Error fetching available trains' });
+        }
+        res.json(results);
+    });
+});
+
+app.get('/train-details/:trainId', (req, res) => {
+    const trainId = req.params.trainId;
+    const { coach, source, destination } = req.query;
+    
+    const query = `
+        SELECT 
+            t.TrainID,
+            t.TrainName,
+            src.StationName AS SourceStation,
+            dest.StationName AS DestinationStation,
+            r_src.ArrivalTime AS DepartureTime,
+            r_dest.ArrivalTime AS ArrivalTime,
+            c.CoachName,
+            ta.Price,
+            ta.AvailableSeats
+        FROM Route r_src
+        JOIN Route r_dest ON r_src.TrainID = r_dest.TrainID
+        JOIN Train t ON r_src.TrainID = t.TrainID
+        JOIN Station src ON r_src.StationID = src.StationID
+        JOIN Station dest ON r_dest.StationID = dest.StationID
+        JOIN TrainAvailability ta ON r_src.TrainID = ta.TrainID
+        JOIN Coach c ON ta.CoachID = c.CoachID AND c.CoachName = ?
+        WHERE 
+            t.TrainID = ?
+            AND src.StationName = ?
+            AND dest.StationName = ?
+            AND r_src.SequenceNumber < r_dest.SequenceNumber
+        LIMIT 1
+    `;
+
+    db.query(query, [coach, trainId, source, destination], (err, results) => {
+        if (err) {
+            console.error('Error fetching train details:', err);
+            return res.status(500).json({ error: 'Error fetching train details' });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Train not found' });
+        }
+        res.json(results[0]);
     });
 });
 
