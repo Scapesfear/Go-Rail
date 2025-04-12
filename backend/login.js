@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
+const cors = require('cors');
+
+// Enable CORS for all routes
+router.use(cors());
 
 router.post('/', (req, res) => {
     console.log("Received login request:", req.body);
@@ -8,10 +12,9 @@ router.post('/', (req, res) => {
   
     let query = '';
     if (role === 'Admin') {
-        query = `SELECT * FROM LoginDetails WHERE ContactNumber = ? AND Password = ? AND Role = 'Admin'`;
-    } 
-    else {
-        query = `SELECT * FROM LoginDetails WHERE ContactNumber = ? AND Password = ? AND Role = 'Passenger'`;
+        query = `SELECT * FROM LoginDetails WHERE LoginName = ? AND Password = ? AND UserType = 'Admin'`;
+    } else {
+        query = `SELECT * FROM LoginDetails WHERE ContactNumber = ? AND Password = ? AND UserType = 'Passenger'`;
     }
 
     db.query(query, [contact, password], (err, results) => {
