@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard - GoRail</title>
+  <link rel="stylesheet" href="role.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome, Admin 👨‍💼</h1>
+      <p>Manage GoRail system operations</p>
+    </div>
+
+    <div class="role-options">
+      <div class="role-card" onclick="location.href='manage_users.html'">
+        <div class="role-icon">👥</div>
+        <h2>Manage Users</h2>
+        <p>View, delete, or update user details</p>
+      </div>
+      <div class="role-card" onclick="location.href='manage_trains.html'">
+        <div class="role-icon">🚆</div>
+        <h2>Manage Trains</h2>
+        <p>Add new trains, update schedules, seat availability</p>
+      </div>
+      <div class="role-card" onclick="location.href='booking_overview.html'">
+        <div class="role-icon">📃</div>
+        <h2>View Bookings</h2>
+        <p>All ticket bookings and cancellations</p>
+      </div>
+      <div class="role-card" onclick="location.href='landing.html'">
+        <div class="role-icon">🔓</div>
+        <h2>Logout</h2>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

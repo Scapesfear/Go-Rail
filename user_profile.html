@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile - GoRail</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="auth-container">
+      <div class="header" id="profileHeader" style="display: none;">
+        <h1></h1>
+        <p></p>
+        <p></p>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="submit-btn" onclick="location.href='booking_history.html'">View Booking History</button>
+        <button class="submit-btn" onclick="location.href='edit_profile.html'">Edit Profile</button>
+        <button class="submit-btn" style="background: #ccc; color: black;" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check if the user is logged in
+    const loginId = localStorage.getItem('loginId');
+    console.log('Login ID:', loginId); 
+    
+    if (!loginId) {
+      alert("You must be logged in.");
+      window.location.href = 'login.html';
+    }
+
+    // Fetch user profile data from the server
+    fetch(`http://localhost:3001/profile/${loginId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const user = data.data;
+          document.querySelector('h1').textContent = `Hello, ${user.FirstName} ${user.LastName} 👋`;
+          document.querySelectorAll('p')[0].textContent = `Email: ${user.Email}`;
+          document.querySelectorAll('p')[1].textContent = `Contact: ${user.ContactNumber}`;
+          document.getElementById('profileHeader').style.display = 'block';
+        } else {
+          alert('User not found.');
+        }
+      })
+      .catch(err => {
+        console.error('Profile fetch error:', err);
+        alert('Error fetching profile.');
+      });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('loginId');
+      window.location.href = 'landing.html';
+    }
+  </script>
+</body>
+</html>
