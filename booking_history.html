@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking History | GoRail</title>
+  <link rel="stylesheet" href="booking_history.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Booking History</h1>
+      <p id="greeting">Welcome, Passenger</p>
+    </header>
+    
+    <table id="historyTable">
+        <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Train</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          
+        <tbody>
+          <!-- Bookings will be filled here -->
+        </tbody>
+      </table>
+      
+    
+    <p id="noBookings" class="no-bookings">You have no past bookings.</p>
+    
+    <div class="back">
+      <button onclick="window.location.href='passenger_homescreen.html'">← Back to Home</button>
+    </div>
+  </div>
+  
+  <script src="booking_history.js"></script>
+</body>
+</html>

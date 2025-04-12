@@ -102,9 +102,12 @@
       const data = await response.json();
       console.log("Hello");
       if (data.success) {
-        alert('Login successful!');
-        // Redirect to dashboard or home page
-        window.location.href = 'landing.html';
+      // Save name in localStorage
+      localStorage.setItem("userName", data.user.LoginName);
+      localStorage.setItem("loginID", data.user.LoginID);
+      
+      alert('Login successful!');
+      window.location.href = 'passenger_homescreen.html';
       } else {
         alert(data.message || 'Login failed');
       }
