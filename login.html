@@ -108,9 +108,8 @@
     const identifier = loginIdentifier.value;
     const password = document.getElementById('loginPassword').value;
 
-    const payload = (role === 'Admin')
-            ? { loginName: identifier, password, role: 'Admin' }
-            : { contact: identifier, password, role: 'Passenger' };
+    const payload = { contact: identifier, password, role };
+
 
     try {
       const response = await fetch('http://localhost:3001/login', {
@@ -126,7 +125,7 @@
         localStorage.setItem("userName", data.user.LoginName);
         localStorage.setItem("loginID", data.user.LoginID);
         alert('Login successful!');
-        window.location.href = (role === 'Admin') ? 'admin_dashboard.html' : 'passenger_homescreen.html';
+        window.location.href = (role === 'Admin') ? 'admin_homescreen.html' : 'passenger_homescreen.html';
       } else {
         alert(data.message || 'Login failed');
       }

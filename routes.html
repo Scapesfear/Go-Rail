@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Routes</title>
+  <link rel="stylesheet" href="routes.css" />
+</head>
+<body>
+  <h1>Route Management</h1>
+
+  <div class="input-group">
+    <input type="number" id="trainIdInput" placeholder="Enter Train ID (e.g. 101)" />
+    <button onclick="fetchArrivalTimes()">Show Arrival Times</button>
+    <button onclick="fetchRouteDetails()">Show Route Details</button>
+    <button onclick="window.location.href='admin_homescreen.html'">Back</button>
+  </div>
+
+  <table>
+    <thead id="tableHead"></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script src="routesf.js"></script>
+</body>
+</html>
