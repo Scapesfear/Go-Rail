@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Train Finances</title>
+  <link rel="stylesheet" href="train_finances.css" />
+</head>
+<body>
+  <h1>Train Finances Dashboard</h1>
+
+  <div class="btn-group">
+    <button onclick="fetchRevenue()">Revenue by Train</button>
+    <button onclick="fetchMaxBookings()">Date with Max Bookings</button>
+    <button onclick="window.location.href='trains.html'">Back to Admin Panel</button>
+  </div>
+
+  <table>
+    <thead id="tableHead"></thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <script src="train_finances.js"></script>
+</body>
+</html>

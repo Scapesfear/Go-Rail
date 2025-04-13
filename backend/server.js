@@ -17,6 +17,10 @@ const loginRoutes = require('./login');
 const signupRoutes = require('./signup');
 const bookingsRoutes = require('./bookings');
 const passengerRoutes = require('./passengers');
+const transactionRoutes = require('./transactions');
+const trainRoutes = require('./trains');
+const financeRoutes = require("./finances");
+const routeRoutes = require('./routes');
 
 
 
@@ -27,6 +31,11 @@ app.use('/login', loginRoutes);
 app.use('/signup', signupRoutes);
 app.use('/bookings', bookingsRoutes);    
 app.use('/passengers', passengerRoutes);
+app.use('/', transactionRoutes);
+app.use('/trains', trainRoutes);
+app.use("/finances", financeRoutes);
+app.use('/routes', routeRoutes);
+
 
 // New routes for booking page
 app.get('/stations', (req, res) => {

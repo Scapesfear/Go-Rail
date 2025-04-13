@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Train Management</title>
+  <link rel="stylesheet" href="trains.css" />
+</head>
+<body>
+  <h1>Train Management - Admin Panel</h1>
+
+  <div class="filters">
+    <input type="text" id="fromCity" placeholder="From City (New Delhi)">
+    <input type="text" id="toCity" placeholder="To City (Mumbai)">
+    <input type="date" id="cityDate">
+    <button onclick="fetchByCity()">Search by City</button>
+  </div>
+  
+  <div class="filters">
+    <input type="text" id="fromStation" placeholder="From Station (LTT)">
+    <input type="text" id="toStation" placeholder="To Station (Tambaram)">
+    <input type="date" id="stationDate">
+    <button onclick="fetchByStation()">Search by Stations</button>
+    <button class="finance" onclick="window.location.href='train_finances.html'">Manage Finances</button>
+  </div>
+  
+  <!-- 💡 This was likely missing or improperly styled -->
+  <div class="filters">
+    <input type="text" id="stationName" placeholder="Station (e.g. Anand Vihar Terminal)">
+    <input type="time" id="fromTime">
+    <input type="time" id="toTime">
+    <input type="date" id="arrivalDate">
+    <button onclick="fetchByTimeRange()">Search by Arrival Time</button>
+  </div>
+  
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Train ID</th>
+        <th>Arrival Time</th>
+        <th>Reaching Time</th>
+        <th>Source</th>
+        <th>Destination</th>
+        <th>Travel Date</th>
+        <th>Coach ID</th>
+        <th>Price</th>
+        <th>Available Seats</th>
+      </tr>
+    </thead>
+    <tbody id="trainTableBody"></tbody>
+  </table>
+
+  <script src="trainsf.js"></script>
+</body>
+</html>
