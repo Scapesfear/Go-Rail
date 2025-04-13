@@ -40,7 +40,12 @@ function renderTable(data) {
       <td>${p.Age}</td>
       <td>${p.DOB ? new Date(p.DOB).toLocaleDateString() : '—'}</td>
       <td>${p.TrainID}</td>
-      <td>${p.TravelDate}</td>
+      <td>${new Date(p.TravelDate).toLocaleDateString("en-GB", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric"
+})}</td>
+
     `;
     tbody.appendChild(row);
   });

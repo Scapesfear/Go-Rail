@@ -2,9 +2,19 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchAllTrains();
 });
 
-function renderTable(data) {
+function renderTable(data, hideStations = false) {
   const tbody = document.getElementById("trainTableBody");
+  const thead = document.querySelector("thead tr");  // get header row
   tbody.innerHTML = "";
+
+  // Show or hide station columns in header
+  if (hideStations) {
+    thead.children[3].style.display = "none"; // Source
+    thead.children[4].style.display = "none"; // Destination
+  } else {
+    thead.children[3].style.display = "";
+    thead.children[4].style.display = "";
+  }
 
   data.forEach(row => {
     const tr = document.createElement("tr");
@@ -12,16 +22,21 @@ function renderTable(data) {
       <td>${row.TrainID}</td>
       <td>${row.arrivalTime}</td>
       <td>${row.reachingTime}</td>
-      <td>${row.sourceStation}</td>
-      <td>${row.destinationStation}</td>
+      <td class="source">${row.sourceStation}</td>
+      <td class="dest">${row.destinationStation}</td>
       <td>${new Date(row.TravelDate).toLocaleDateString()}</td>
       <td>${row.CoachID}</td>
       <td>${row.Price}</td>
       <td>${row.AvailableSeats}</td>
     `;
+    if (hideStations) {
+      tr.querySelector(".source").style.display = "none";
+      tr.querySelector(".dest").style.display = "none";
+    }
     tbody.appendChild(tr);
   });
 }
+
 
 function fetchAllTrains() {
   fetch("http://localhost:3001/trains/all")
@@ -54,9 +69,10 @@ function fetchByStation() {
 
   fetch(`http://localhost:3001/trains/by-station?${params.toString()}`)
     .then(res => res.json())
-    .then(data => renderTable(data))
+    .then(data => renderTable(data, true)) // ✅ hide station columns
     .catch(err => console.error("Error fetching by station:", err));
 }
+
 
 // Make these globally available for inline HTML onclick attributes
 window.fetchByCity = fetchByCity;
