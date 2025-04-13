@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Profile - GoRail</title>
+  <link rel="stylesheet" href="login.css" />
+  <style>
+    /* Input Box Styling */
+    input {
+      padding: 12px; /* Added padding for space inside the input fields */
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      background-color: #fafafa;
+      transition: all 0.3s ease;
+    }
+  
+    /* Focus effect on input boxes */
+    input:focus {
+      border-color: #0056b3;
+      background-color: #fff;
+      outline: none;
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="container">
+    <div class="auth-container">
+      <h2>Edit Profile</h2>
+      <form id="editProfileForm">
+        <input type="text" id="loginName" placeholder="Login Name" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="contactNumber" placeholder="Contact Number" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button class="submit-btn" type="submit">Save Changes</button>
+        <button class="submit-btn" type="button" style="background: #ccc; color: black;" onclick="cancelEdit()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="profile.js"></script>
+</body>
+</html>
