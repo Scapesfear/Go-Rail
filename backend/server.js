@@ -21,6 +21,8 @@ const transactionRoutes = require('./transactions');
 const trainRoutes = require('./trains');
 const financeRoutes = require("./finances");
 const routeRoutes = require('./routes');
+const ticketDetailsRoutes = require('./ticketDetails');
+
 
 
 
@@ -35,7 +37,7 @@ app.use('/', transactionRoutes);
 app.use('/trains', trainRoutes);
 app.use("/finances", financeRoutes);
 app.use('/routes', routeRoutes);
-
+app.use('/', ticketDetailsRoutes);
 
 // New routes for booking page
 app.get('/stations', (req, res) => {
