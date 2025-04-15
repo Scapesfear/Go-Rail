@@ -87,7 +87,7 @@ function loadTicketDetails() {
           <td>${ticket.FirstName} ${ticket.LastName}</td>
           <td>${ticket.TrainName}</td>
           <td>${ticket.CoachName}</td>
-          <td>${ticket.TravelDate}</td>
+          <td>${new Date(ticket.TravelDate).toLocaleDateString('en-CA')}</td>
           <td>${ticket.BookingStatus}</td>
           <td>${ticket.RefundStatus}
           <td>${ticket.SourceStation}</td>
