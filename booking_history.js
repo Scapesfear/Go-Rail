@@ -16,10 +16,8 @@ function createBookingRow(booking) {
     <td>${booking.TransactionID}</td>
     <td>${booking.TrainName}</td>
     <td>${booking.BookingDate?.split('T')[0]}</td>
-    <td>${booking.BookingStatus}</td>
     <td>
     <button class="view-btn" onclick="viewDetails('${booking.TransactionID}')">Show Details</button>
-    <button class="cancel-btn" onclick="cancelBooking('${booking.TicketID}')">Cancel</button>
     </td>
   `;
   return tr;

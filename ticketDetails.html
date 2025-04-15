@@ -14,13 +14,17 @@
     <table id="detailsTable">
       <thead>
         <tr>
+          <th>Ticket ID</th>
           <th>Passenger Name</th>
           <th>Train</th>
           <th>Coach</th>
           <th>Travel Date</th>
           <th>Booking Status</th>
+          <th>Refund</th>
           <th>Source</th>
           <th>Destination</th>
+          <th>Waiting Number</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -28,8 +32,18 @@
       </tbody>
     </table>
 
+    <div id="confirmationModal" class="modal">
+      <div class="modal-content">
+        <p>Are you sure you want to cancel this ticket?</p>
+        <div class="modal-buttons">
+          <button id="confirmCancel">Yes</button>
+          <button id="cancelCancel">No</button>
+        </div>
+      </div>
+    </div>
+
     <div class="back">
-      <button onclick="window.history.back()">← Back</button>
+      <button onclick="window.location.href='booking_history.html'">← Back</button>
     </div>
   </div>
 

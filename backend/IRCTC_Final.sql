@@ -870,14 +870,14 @@ where R.StationID = 10;
 
 
 
-
-update TrainAvailability as ta
-join Booking as b 
-  on ta.TrainID = b.TrainID 
-  and ta.TravelDate = b.TravelDate 
-  and ta.CoachID = b.CoachID
-set ta.AvailableSeats = ta.AvailableSeats + 1
-where b.TicketID = 1;
+-- When cancelling happens available tickets increase
+-- update TrainAvailability as ta
+-- join Booking as b 
+--   on ta.TrainID = b.TrainID 
+--   and ta.TravelDate = b.TravelDate 
+--   and ta.CoachID = b.CoachID
+-- set ta.AvailableSeats = ta.AvailableSeats + 1
+-- where b.TicketID = 1;
 
 
 
