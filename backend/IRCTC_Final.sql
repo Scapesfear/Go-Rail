@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS IRCTC_DB6;
-USE IRCTC_DB6;
+CREATE DATABASE IF NOT EXISTS IRCTC_DB9;
+USE IRCTC_DB9;
 SHOW DATABASES;
 
-use IRCTC_DB6;
+use IRCTC_DB9;
 
 CREATE TABLE Station (
     StationID INT PRIMARY KEY auto_increment, 
@@ -76,7 +76,7 @@ CREATE TABLE Route (
 CREATE TABLE Transactions
 (
 	LoginID INT NOT NULL, 
-    TransactionID INT PRIMARY KEY AUTO_INCREMENT,
+    TransactionID INT auto_increment primary key,
     PaymentMean Varchar(20) CHECK(PaymentMean IN ('Credit Card', 'Debit Card', 'Net Banking', 'UPI', 'Wallet')),
     Amount Decimal(10, 2)
 );
@@ -124,6 +124,7 @@ CREATE TABLE WaitingList (
     TrainID INT NOT NULL,                      -- Foreign key to Train
     CoachID INT NOT NULL,
     TicketID INT NOT NULL,
+    TravelDate date,
     PRIMARY KEY(WaitingID,TrainID,CoachID),
     FOREIGN KEY (PassengerID) REFERENCES Passenger(PassengerID),
     FOREIGN KEY (TrainID) REFERENCES Train(TrainID),
@@ -189,12 +190,20 @@ INSERT INTO LoginDetails (LoginName, Password, ContactNumber, Email, UserType) V
 ('vivek_yadav', 'vivekpass', '9135566778', 'vivek.yadav@example.com', 'Passenger'),
 ('sanjay_mehta', 'sanjaypass', '9146677889', 'sanjay.mehta@example.com', 'Passenger'),
 ('ruchi_rana', 'ruchipass', '9157788990', 'ruchi.rana@example.com', 'Passenger'),
-('varun_bhatt', 'varunpass', '9168899001', 'varun.bhatt@example.com', 'Passenger'),
+('varun_bhatt', 'varunpass', '9168899001', 'varun.bhatt@example.com', 'Passenger'), -- login id 10
 ('isha_malhotra', 'ishapass', '9179900112', 'isha.malhotra@example.com', 'Passenger'),
 ('arjun_nair', 'arjunpass', '9180011223', 'arjun.nair@example.com', 'Passenger'),
 ('neha_srivastava', 'nehapass', '9191122334', 'neha.srivastava@example.com', 'Passenger'),
 ('manish_rao', 'manishpass', '9202233445', 'manish.rao@example.com', 'Passenger'),
-('rekha_pillai', 'rekhapass', '9213344556', 'rekha.pillai@example.com', 'Passenger'),
+('rekha_pillai', 'rekhapass', '9213344556', 'rekha.pillai@example.com', 'Passenger'), -- login id 15
+('tarun_kapoor', 'tarunpass', '9224455667', 'tarun.kapoor@example.com', 'Passenger'),
+('meera_das', 'meerapass', '9235566778', 'meera.das@example.com', 'Passenger'),
+('alok_mishra', 'alokpass', '9246677889', 'alok.mishra@example.com', 'Passenger'),
+('naina_saxena', 'nainapass', '9257788990', 'naina.saxena@example.com', 'Passenger'),
+('rohit_chaudhary', 'rohitpass', '9268899001', 'rohit.chaudhary@example.com', 'Passenger'),
+('kanika_jain', 'kanikapass', '9279900112', 'kanika.jain@example.com', 'Passenger'),
+('dev_singhania', 'devpass', '9280011223', 'dev.singhania@example.com', 'Passenger'),
+('shruti_menon', 'shrutipass', '9291122334', 'shruti.menon@example.com', 'Passenger'), -- login id 23
 -- Admins (Few in number)
 ('admin', 'admin123', '9876543210', 'admin@example.com', 'Admin'),
 ('ravi_admin', 'raviadmin', '9000000001', 'ravi.admin@example.com', 'Admin'),
@@ -570,27 +579,29 @@ INSERT INTO Passenger (PassengerID, LoginID, FirstName, LastName, AadharNO, Gend
 (45, 25, 'Harsh', 'Yadav', '123456789056', 'M', 33, '1991-05-30');
 
 -- I am assuming transactions dont fail
-INSERT INTO Transactions (LoginID, TransactionID, Amount, PaymentMean) VALUES
-(1, 1, 2000, 'Credit Card'),
-(3, 2, 800, 'UPI'),
-(5, 3, 1200, 'Debit Card'),
-(5, 4, 2000, 'Net Banking'),
-(9, 5, 1600, 'Wallet'),
-(10, 6, 6000, 'UPI'), 
-(12, 7, 6000, 'Credit Card'), 
-(15, 8, 3000, 'Net Banking'),
-(15, 9, 3000, 'Wallet'), 
-(1, 10, 1000, 'Debit Card'), 
-(3, 11, 1200, 'UPI'), 
-(5, 12, 6000, 'Credit Card'), 
-(7, 13, 6000, 'Net Banking'), 
-(9, 14, 1000, 'Debit Card'), 
-(10, 15, 2000, 'Wallet'), 
-(12, 16, 1600, 'UPI'), 
-(14, 17, 6000, 'Credit Card'), 
-(15, 18, 800, 'Debit Card'),
-(19, 19,  2400, 'Credit Card'),
-(20, 20, 2000, 'Wallet');
+INSERT INTO Transactions (LoginID, Amount, PaymentMean) VALUES
+(1, 2000, 'Credit Card'),-- Transaction ID 1
+(3, 800, 'UPI'),
+(5, 1200, 'Debit Card'),
+(5, 2000, 'Net Banking'),
+(9, 1600, 'Wallet'),
+(10, 6000, 'UPI'), 
+(12, 6000, 'Credit Card'), 
+(15, 3000, 'Net Banking'),
+(15, 3000, 'Wallet'), 
+(1, 1000, 'Debit Card'), 
+(3, 1200, 'UPI'), 
+(5, 6000, 'Credit Card'), 
+(7, 6000, 'Net Banking'), 
+(9, 1000, 'Debit Card'), 
+(10, 2000, 'Wallet'), 
+(12, 1600, 'UPI'), 
+(14, 6000, 'Credit Card'), 
+(15, 800, 'Debit Card'),
+(19, 2400, 'Credit Card'),
+(20, 2000, 'Wallet'),
+(21, 2400, 'Credit Card'),
+(22, 2000, 'Wallet'); -- Transaction ID 22
 
 
 INSERT INTO Booking (PassengerID, TransactionID, TrainID, BookingDate, CoachID, BookingStatus, RefundStatus, Source, Destination, TravelDate, LoginID) VALUES
@@ -657,20 +668,29 @@ INSERT INTO Booking (PassengerID, TransactionID, TrainID, BookingDate, CoachID, 
 (30, 18, 115, '2025-03-28 14:45:00', 4, 'CONFIRMED', 'Not requested', 14, 23, '2025-04-25', 15),
 
 -- LoginID 19 booked 2 tickets
-(31, 19, 116, '2025-04-09 10:00:00', 1, 'WAITING', 'Not requested', 12, 24, '2025-04-09', 19),
-(32, 19, 116, '2025-04-09 10:00:00', 1, 'WAITING', 'Not requested', 12, 24, '2025-04-09', 19),
+(31, 19, 116, '2025-04-09 10:00:00', 1, 'CONFIRMED', 'Not requested', 12, 24, '2025-04-09', 19),
+(32, 19, 116, '2025-04-09 10:00:00', 1, 'CONFIRMED', 'Not requested', 12, 24, '2025-04-09', 19),
 
 -- LoginID 20 booked 2 tickets
-(33, 20, 117, '2025-03-23 11:00:00', 2, 'WAITING', 'Not requested', 1, 7, '2025-04-10', 20),
-(34, 20, 117, '2025-03-24 11:00:00', 2, 'WAITING', 'Not requested', 1, 7, '2025-04-10', 20);
+(33, 20, 117, '2025-03-23 11:00:00', 2, 'CONFIRMED', 'Not requested', 1, 7, '2025-04-10', 20),
+(34, 20, 117, '2025-03-23 11:00:00', 2, 'CONFIRMED', 'Not requested', 1, 7, '2025-04-10', 20),
+
+-- Loginid 21 booked 2 tickets
+(35, 21, 116, '2025-04-09 11:00:00', 1, 'WAITING', 'Not requested', 12, 24, '2025-04-09', 21),
+(36, 21, 116, '2025-04-09 11:00:00', 1, 'WAITING', 'Not requested', 12, 24, '2025-04-09', 21),
+
+-- LoginID 22 booked 2 tickets
+(37, 22, 117, '2025-03-23 12:00:00', 2, 'WAITING', 'Not requested', 1, 7, '2025-04-10', 22),
+(38, 22, 117, '2025-03-23 12:00:00', 2, 'WAITING', 'Not requested', 1, 7, '2025-04-10', 22)
 
 
--- Insert data into WaitingList (Fix TrainID to match TicketID)
-INSERT INTO WaitingList (WaitingID, PassengerID, TrainID, CoachID, TicketID) VALUES
-(1, 31, 116, 1, 31),
-(2, 32, 116, 1, 32),
-(1, 33, 117, 2, 33),
-(2, 34, 117, 2, 34);
+;
+
+INSERT INTO WaitingList (WaitingID, PassengerID, TrainID, CoachID, TicketID, TravelDate) VALUES
+(1, 35, 116, 1, 35, '2025-04-09'),
+(2, 36, 116, 1, 36, '2025-04-09'),
+(1, 37, 117, 2, 37, '2025-04-10'),
+(2, 38, 117, 2, 38, '2025-04-10');
 
 
 -- Searching for trains arriving on a station in between a particular time frame
@@ -860,13 +880,7 @@ set ta.AvailableSeats = ta.AvailableSeats + 1
 where b.TicketID = 1;
 
 
--- inserting a booking record after confirming that the selected train, date, and coach have enough available seats
 
-INSERT INTO Booking (PassengerID, TransactionID, TrainID, BookingDate, CoachID, BookingStatus, RefundStatus, Source, Destination, TravelDate, LoginID) 
-SELECT 36, 21, 101, NOW(), 1, 'CONFIRMED', 'Not requested', 1, 2, '2025-04-02', 20
-FROM TrainAvailability 
-WHERE TrainID = 101 AND TravelDate = '2025-04-02' AND CoachID = 1 AND AvailableSeats > 0;
-delete from Booking where TicketID=35;
 
 
 --  Retrieve the payment history for a specific user by joining the Payment and Booking tables and ordering the results by the most recent payment date.
@@ -924,3 +938,4 @@ JOIN Station S1 ON B.Source = S1.StationID
 JOIN Station S2 ON B.Destination = S2.StationID
 JOIN Train T ON B.TrainID = T.TrainID
 WHERE B.TransactionID = 10;
+select * from WaitingList;
