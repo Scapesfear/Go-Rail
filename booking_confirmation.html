@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="booking_confirmation.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ... existing styles ... */
+        
+        .status-confirmed {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-waiting {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        
+        .detail-item .value.status-confirmed,
+        .detail-item .value.status-waiting {
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .detail-item .value.status-confirmed {
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        
+        .detail-item .value.status-waiting {
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">

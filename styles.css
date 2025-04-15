@@ -1,0 +1,12 @@
+.book-btn.waitlist {
+    background-color: #ff9800;
+    color: white;
+}
+
+.book-btn.waitlist:hover {
+    background-color: #f57c00;
+}
+
+.seats.no-seats {
+    color: #f44336;
+} 

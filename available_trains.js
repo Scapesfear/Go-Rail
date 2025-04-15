@@ -32,6 +32,29 @@ async function fetchAvailableTrains() {
 function createTrainCard(train) {
     const card = document.createElement('div');
     card.className = 'train-card';
+    
+    // Calculate confirmed and waitlist seats
+    const confirmedSeats = Math.min(train.AvailableSeats, passengerCount);
+    const waitlistSeats = train.AvailableSeats < passengerCount ? passengerCount - train.AvailableSeats : 0;
+    
+    // Determine booking status message
+    let seatsText = '';
+    let buttonText = '';
+    let buttonClass = 'book-btn';
+    
+    if (train.AvailableSeats === 0) {
+        seatsText = `All ${passengerCount} tickets will be waitlisted`;
+        buttonText = 'Join Waitlist';
+        buttonClass = 'book-btn waitlist';
+    } else if (waitlistSeats > 0) {
+        seatsText = `${confirmedSeats} tickets will be confirmed, ${waitlistSeats} will be waitlisted`;
+        buttonText = 'Book Split Tickets';
+        buttonClass = 'book-btn split';
+    } else {
+        seatsText = `${train.AvailableSeats} seats left`;
+        buttonText = 'Book Now';
+    }
+    
     card.innerHTML = `
         <div class="train-info">
             <div class="train-name">${train.TrainName}</div>
@@ -47,9 +70,9 @@ function createTrainCard(train) {
         </div>
         <div class="price-info">
             <div class="price">₹${train.Price}</div>
-            <div class="seats">${train.AvailableSeats} seats left</div>
+            <div class="seats ${waitlistSeats > 0 ? 'split-seats' : train.AvailableSeats === 0 ? 'no-seats' : ''}">${seatsText}</div>
         </div>
-        <button class="book-btn" onclick="bookTrain(${train.TrainID})">Book Now</button>
+        <button class="${buttonClass}" onclick="bookTrain(${train.TrainID})">${buttonText}</button>
     `;
     return card;
 }
