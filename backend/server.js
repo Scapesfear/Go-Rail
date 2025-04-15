@@ -156,6 +156,348 @@ app.get('/train-details/:trainId', (req, res) => {
     });
 });
 
+// Book tickets endpoint
+app.post('/book-tickets', (req, res) => {
+    const {
+        loginId,
+        trainId,
+        travelDate,
+        coachClass,
+        paymentMethod,
+        totalAmount,
+        passengers,
+        sourceStation,
+        destinationStation
+    } = req.body;
+
+    console.log('Booking request received:', {
+        trainId,
+        travelDate,
+        coachClass,
+        passengerCount: passengers.length,
+        sourceStation,
+        destinationStation
+    });
+
+    // Start transaction
+    db.beginTransaction((err) => {
+        if (err) {
+            console.error('Error starting transaction:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Error starting transaction'
+            });
+        }
+
+        // Get coach ID from coach class
+        db.query(
+            'SELECT CoachID FROM Coach WHERE CoachName = ?',
+            [coachClass],
+            (err, coachResult) => {
+                if (err || !coachResult[0]) {
+                    db.rollback(() => {
+                        console.error('Error getting coach ID:', err);
+                        res.status(400).json({
+                            success: false,
+                            message: 'Invalid coach class'
+                        });
+                    });
+                    return;
+                }
+                
+                const coachId = coachResult[0].CoachID;
+                console.log('Retrieved coach ID:', coachId);
+                
+                // Continue with the booking process using the coach ID
+                processBooking(coachId);
+            }
+        );
+    });
+
+    function processBooking(coachId) {
+        // Get source and destination station IDs
+        db.query(
+            'SELECT StationID FROM Station WHERE StationName = ?',
+            [sourceStation],
+            (err, sourceStationResult) => {
+                if (err) {
+                    db.rollback(() => {
+                        console.error('Error getting source station:', err);
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error getting source station'
+                        });
+                    });
+                    return;
+                }
+
+                db.query(
+                    'SELECT StationID FROM Station WHERE StationName = ?',
+                    [destinationStation],
+                    (err, destStationResult) => {
+                        if (err) {
+                            db.rollback(() => {
+                                console.error('Error getting destination station:', err);
+                                res.status(500).json({
+                                    success: false,
+                                    message: 'Error getting destination station'
+                                });
+                            });
+                            return;
+                        }
+
+                        if (!sourceStationResult[0] || !destStationResult[0]) {
+                            db.rollback(() => {
+                                res.status(400).json({
+                                    success: false,
+                                    message: 'Invalid source or destination station'
+                                });
+                            });
+                            return;
+                        }
+
+                        const sourceStationId = sourceStationResult[0].StationID;
+                        const destStationId = destStationResult[0].StationID;
+
+                        // Check available seats with detailed logging
+                        db.query(
+                            'SELECT AvailableSeats FROM TrainAvailability WHERE TrainID = ? AND TravelDate = ? AND CoachID = ?',
+                            [trainId, travelDate, coachId],
+                            (err, availability) => {
+                                if (err) {
+                                    db.rollback(() => {
+                                        console.error('Error checking availability:', err);
+                                        res.status(500).json({
+                                            success: false,
+                                            message: 'Error checking seat availability'
+                                        });
+                                    });
+                                    return;
+                                }
+
+                                console.log('Seat availability check:', {
+                                    trainId,
+                                    travelDate,
+                                    coachId,
+                                    availability: availability[0],
+                                    requestedSeats: passengers.length
+                                });
+
+                                // First check if we have a record
+                                if (!availability || availability.length === 0) {
+                                    // Try to create a new availability record if none exists
+                                    db.query(
+                                        'INSERT INTO TrainAvailability (TrainID, TravelDate, CoachID, AvailableSeats) VALUES (?, ?, ?, 11)',
+                                        [trainId, travelDate, coachId],
+                                        (err, result) => {
+                                            if (err) {
+                                                db.rollback(() => {
+                                                    console.error('Error creating availability record:', err);
+                                                    res.status(500).json({
+                                                        success: false,
+                                                        message: 'Error creating availability record'
+                                                    });
+                                                });
+                                                return;
+                                            }
+                                            
+                                            // Now proceed with the booking
+                                            const availableSeats = 11; // New record created with 11 seats
+                                            if (availableSeats < passengers.length) {
+                                                db.rollback(() => {
+                                                    res.status(400).json({
+                                                        success: false,
+                                                        message: `Not enough seats available. Available: ${availableSeats}, Requested: ${passengers.length}`
+                                                    });
+                                                });
+                                                return;
+                                            }
+
+                                            // Continue with the rest of the booking process...
+                                            processBookingWithSeats(coachId, sourceStationId, destStationId);
+                                        }
+                                    );
+                                } else {
+                                    // Existing availability record found
+                                    const availableSeats = availability[0].AvailableSeats;
+                                    if (availableSeats < passengers.length) {
+                                        db.rollback(() => {
+                                            res.status(400).json({
+                                                success: false,
+                                                message: `Not enough seats available. Available: ${availableSeats}, Requested: ${passengers.length}`
+                                            });
+                                        });
+                                        return;
+                                    }
+
+                                    // Continue with the rest of the booking process...
+                                    processBookingWithSeats(coachId, sourceStationId, destStationId);
+                                }
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    }
+
+    function processBookingWithSeats(coachId, sourceStationId, destStationId) {
+        // Insert transaction record
+        db.query(
+            'INSERT INTO Transactions (TransactionID, LoginID, PaymentMean, Amount) VALUES (NULL, ?, ?, ?)',
+            [loginId, paymentMethod, totalAmount],
+            (err, transactionResult) => {
+                if (err) {
+                    db.rollback(() => {
+                        console.error('Error creating transaction:', err);
+                        res.status(500).json({
+                            success: false,
+                            message: 'Error creating transaction'
+                        });
+                    });
+                    return;
+                }
+
+                const transactionId = transactionResult.insertId;
+
+                // Process each passenger
+                let processedPassengers = 0;
+                passengers.forEach((passenger, index) => {
+                    // Insert passenger record
+                    db.query(
+                        'INSERT INTO Passenger (LoginID, FirstName, LastName, AadharNO, Gender, Age, DOB) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [
+                            loginId,
+                            passenger.firstName,
+                            passenger.lastName,
+                            passenger.aadharNo,
+                            passenger.gender,
+                            passenger.age,
+                            passenger.dob
+                        ],
+                        (err, passengerResult) => {
+                            if (err) {
+                                db.rollback(() => {
+                                    console.error('Error creating passenger:', err);
+                                    res.status(500).json({
+                                        success: false,
+                                        message: 'Error creating passenger record'
+                                    });
+                                });
+                                return;
+                            }
+
+                            const passengerId = passengerResult.insertId;
+
+                            // Insert booking record
+                            db.query(
+                                'INSERT INTO Booking (TransactionID, PassengerID, TrainID, LoginID, CoachID, BookingDate, BookingStatus, RefundStatus, Source, TravelDate, Destination) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)',
+                                [
+                                    transactionId,
+                                    passengerId,
+                                    trainId,
+                                    loginId,
+                                    coachId,
+                                    'CONFIRMED',
+                                    'Not requested',
+                                    sourceStationId,
+                                    travelDate,
+                                    destStationId
+                                ],
+                                (err) => {
+                                    if (err) {
+                                        db.rollback(() => {
+                                            console.error('Error creating booking:', err);
+                                            res.status(500).json({
+                                                success: false,
+                                                message: 'Error creating booking record'
+                                            });
+                                        });
+                                        return;
+                                    }
+
+                                    processedPassengers++;
+                                    if (processedPassengers === passengers.length) {
+                                        // Update available seats
+                                        db.query(
+                                            'UPDATE TrainAvailability SET AvailableSeats = AvailableSeats - ? WHERE TrainID = ? AND TravelDate = ? AND CoachID = ?',
+                                            [passengers.length, trainId, travelDate, coachId],
+                                            (err) => {
+                                                if (err) {
+                                                    db.rollback(() => {
+                                                        console.error('Error updating availability:', err);
+                                                        res.status(500).json({
+                                                            success: false,
+                                                            message: 'Error updating seat availability'
+                                                        });
+                                                    });
+                                                    return;
+                                                }
+
+                                                // Get train details for confirmation
+                                                db.query(
+                                                    'SELECT t.TrainName, t.TrainID, c.CoachName, ta.AvailableSeats FROM Train t JOIN Coach c ON c.CoachID = ? JOIN TrainAvailability ta ON ta.TrainID = t.TrainID AND ta.CoachID = c.CoachID WHERE t.TrainID = ?',
+                                                    [coachId, trainId],
+                                                    (err, trainDetails) => {
+                                                        if (err) {
+                                                            db.rollback(() => {
+                                                                console.error('Error getting train details:', err);
+                                                                res.status(500).json({
+                                                                    success: false,
+                                                                    message: 'Error getting train details'
+                                                                });
+                                                            });
+                                                            return;
+                                                        }
+
+                                                        // Commit transaction
+                                                        db.commit((err) => {
+                                                            if (err) {
+                                                                db.rollback(() => {
+                                                                    console.error('Error committing transaction:', err);
+                                                                    res.status(500).json({
+                                                                        success: false,
+                                                                        message: 'Error committing transaction'
+                                                                    });
+                                                                });
+                                                                return;
+                                                            }
+
+                                                            res.json({
+                                                                success: true,
+                                                                message: 'Tickets booked successfully',
+                                                                transactionId: transactionId,
+                                                                bookingDetails: {
+                                                                    passengers: passengers.map(p => ({
+                                                                        name: `${p.firstName} ${p.lastName}`,
+                                                                        aadhar: p.aadharNo,
+                                                                        age: p.age,
+                                                                        gender: p.gender
+                                                                    })),
+                                                                    train: trainDetails[0],
+                                                                    totalAmount,
+                                                                    paymentMethod,
+                                                                    travelDate,
+                                                                    sourceStation,
+                                                                    destinationStation
+                                                                }
+                                                            });
+                                                        });
+                                                    }
+                                                );
+                                            }
+                                        );
+                                    }
+                                }
+                            );
+                        }
+                    );
+                });
+            }
+        );
+    }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
