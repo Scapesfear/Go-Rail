@@ -583,6 +583,136 @@ app.post('/book-tickets', (req, res) => {
     }
 });
 
+// Update user details endpoint
+app.post('/update-details', (req, res) => {
+    const { loginId, loginName, contactNumber, email } = req.body;
+
+    if (!loginId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Login ID is required'
+        });
+    }
+
+    const query = `
+        UPDATE LoginDetails 
+        SET LoginName = ?, ContactNumber = ?, Email = ?
+        WHERE LoginID = ?
+    `;
+
+    db.query(query, [loginName, contactNumber, email, loginId], (err, result) => {
+        if (err) {
+            console.error('Error updating user details:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Error updating user details'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'User details updated successfully'
+        });
+    });
+});
+
+// Get user details endpoint
+app.get('/user-details', (req, res) => {
+    const loginId = req.query.loginId;
+
+    if (!loginId) {
+        return res.status(400).json({
+            success: false,
+            message: 'Login ID is required'
+        });
+    }
+
+    const query = `
+        SELECT LoginID, LoginName, ContactNumber, Email 
+        FROM LoginDetails 
+        WHERE LoginID = ?
+    `;
+
+    db.query(query, [loginId], (err, results) => {
+        if (err) {
+            console.error('Error fetching user details:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Error fetching user details'
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        res.json({
+            success: true,
+            user: results[0]
+        });
+    });
+});
+
+// Change password endpoint
+app.post('/change-password', (req, res) => {
+    const { loginId, currentPassword, newPassword } = req.body;
+
+    if (!loginId || !currentPassword || !newPassword) {
+        return res.status(400).json({
+            success: false,
+            message: 'All fields are required'
+        });
+    }
+
+    // First verify the current password
+    const verifyQuery = `
+        SELECT * FROM LoginDetails 
+        WHERE LoginID = ? AND Password = ?
+    `;
+
+    db.query(verifyQuery, [loginId, currentPassword], (err, results) => {
+        if (err) {
+            console.error('Error verifying password:', err);
+            return res.status(500).json({
+                success: false,
+                message: 'Error verifying current password'
+            });
+        }
+
+        if (results.length === 0) {
+            return res.status(401).json({
+                success: false,
+                message: 'Current password is incorrect'
+            });
+        }
+
+        // If current password is correct, update to new password
+        const updateQuery = `
+            UPDATE LoginDetails 
+            SET Password = ?
+            WHERE LoginID = ?
+        `;
+
+        db.query(updateQuery, [newPassword, loginId], (err, result) => {
+            if (err) {
+                console.error('Error updating password:', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error updating password'
+                });
+            }
+
+            res.json({
+                success: true,
+                message: 'Password updated successfully'
+            });
+        });
+    });
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
