@@ -53,6 +53,12 @@ if (bookingDetails.passengers && bookingDetails.passengers.length > 0) {
                     <span class="label">Date of Birth</span>
                     <span class="value">${formatDate(passenger.dob)}</span>
                 </div>
+                <div class="detail-item">
+                    <span class="label">Ticket Status</span>
+                    <span class="value ${index < bookingDetails.confirmedSeats ? 'status-confirmed' : 'status-waiting'}">
+                        ${index < bookingDetails.confirmedSeats ? 'CONFIRMED' : 'WAITING'}
+                    </span>
+                </div>
             </div>
         `;
         passengersList.appendChild(passengerCard);

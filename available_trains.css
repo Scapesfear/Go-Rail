@@ -8,6 +8,8 @@
     --primary-color: #1a2980;
     --secondary-color: #26d0ce;
     --accent-color: #ff6b6b;
+    --warning-color: #ff9800;
+    --success-color: #4caf50;
     --bg-color: #f5f7fa;
     --text-color: #333;
     --light-text: #777;
@@ -152,9 +154,53 @@ body {
 }
 
 .seats {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    color: var(--secondary-color);
+    color: var(--success-color);
+    margin-top: 0.5rem;
+}
+
+.seats.no-seats {
+    color: var(--warning-color);
+}
+
+.seats.split-seats {
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Add tooltip styles */
+.seats.split-seats {
+    position: relative;
+    cursor: help;
+}
+
+.seats.split-seats:hover::after {
+    content: "Some tickets will be confirmed immediately, while others will be added to the waiting list";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1;
+    margin-bottom: 5px;
+}
+
+.seats.split-seats:hover::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+    margin-bottom: -5px;
 }
 
 .book-btn {
@@ -166,10 +212,28 @@ body {
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    width: 100%;
+    max-width: 200px;
 }
 
 .book-btn:hover {
     background-color: #ff5252;
+}
+
+.book-btn.waitlist {
+    background-color: var(--warning-color);
+}
+
+.book-btn.waitlist:hover {
+    background-color: #f57c00;
+}
+
+.book-btn.split {
+    background-color: var(--primary-color);
+}
+
+.book-btn.split:hover {
+    background-color: #1565c0;
 }
 
 @media (max-width: 768px) {
