@@ -21,8 +21,6 @@ const transactionRoutes = require('./transactions');
 const trainRoutes = require('./trains');
 const financeRoutes = require("./finances");
 const routeRoutes = require('./routes');
-const ticketDetailsRoutes = require('./ticketDetails');
-
 
 
 
@@ -37,7 +35,7 @@ app.use('/', transactionRoutes);
 app.use('/trains', trainRoutes);
 app.use("/finances", financeRoutes);
 app.use('/routes', routeRoutes);
-app.use('/', ticketDetailsRoutes);
+
 
 // New routes for booking page
 app.get('/stations', (req, res) => {
@@ -102,11 +100,12 @@ app.get('/available-trains', (req, res) => {
             src.StationName = ?
             AND dest.StationName = ?
             AND r_src.SequenceNumber < r_dest.SequenceNumber
+            AND ta.AvailableSeats >= ?
         ORDER BY 
             t.TrainName, c.CoachName
     `;
 
-    db.query(query, [date, coach, source, destination], (err, results) => {
+    db.query(query, [date, coach, source, destination, passengers], (err, results) => {
         if (err) {
             console.error('Error fetching available trains:', err);
             return res.status(500).json({ error: 'Error fetching available trains' });
@@ -157,431 +156,33 @@ app.get('/train-details/:trainId', (req, res) => {
     });
 });
 
-// Book tickets endpoint
-app.post('/book-tickets', (req, res) => {
-    const {
-        loginId,
-        trainId,
-        travelDate,
-        coachClass,
-        paymentMethod,
-        totalAmount,
-        passengers,
-        sourceStation,
-        destinationStation
-    } = req.body;
+app.get('/api/transactions/:loginID', (req, res) => {
+  const loginId = req.params.loginID;
+  const query = `
+    SELECT 
+      t.TransactionID AS PaymentID,
+      b.BookingDate AS PaymentDate,
+      t.Amount AS PaymentAmount,
+      t.PaymentMean AS PaymentMethod,
+      b.TicketID
+    FROM Transactions t
+    JOIN Booking b ON t.TransactionID = b.TransactionID
+    WHERE b.LoginID = ?
+    ORDER BY b.BookingDate DESC;
+  `;
 
-    // Input validation
-    if (!loginId || !trainId || !travelDate || !coachClass || !paymentMethod || !totalAmount || !passengers || !sourceStation || !destinationStation) {
-        return res.status(400).json({
-            success: false,
-            message: 'Missing required fields in booking request'
-        });
+  db.query(query, [loginId], (err, results) => {
+    if (err) {
+      console.error('Error fetching transactions:', err);
+      return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-
-    if (!Array.isArray(passengers) || passengers.length === 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid passenger data'
-        });
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: 'No transactions found' });
     }
-
-    // Validate each passenger's data
-    for (const passenger of passengers) {
-        if (!passenger.firstName || !passenger.lastName || !passenger.aadharNo || !passenger.gender || !passenger.age || !passenger.dob) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid passenger details. All fields are required.'
-            });
-        }
-    }
-
-    console.log('Starting booking process for:', {
-        loginId,
-        trainId,
-        travelDate,
-        coachClass,
-        passengerCount: passengers.length
-    });
-
-    // Start transaction
-    db.beginTransaction((err) => {
-        if (err) {
-            console.error('Error starting transaction:', err);
-            return res.status(500).json({
-                success: false,
-                message: 'Error starting booking transaction'
-            });
-        }
-
-        // Get coach ID from coach class
-        db.query(
-            'SELECT CoachID FROM Coach WHERE CoachName = ?',
-            [coachClass],
-            (err, coachResult) => {
-                if (err) {
-                    db.rollback(() => {
-                        console.error('Error getting coach ID:', err);
-                        res.status(500).json({
-                            success: false,
-                            message: 'Error retrieving coach information'
-                        });
-                    });
-                    return;
-                }
-
-                if (!coachResult || coachResult.length === 0) {
-                    db.rollback(() => {
-                        res.status(400).json({
-                            success: false,
-                            message: 'Invalid coach class'
-                        });
-                    });
-                    return;
-                }
-
-                const coachId = coachResult[0].CoachID;
-                console.log('Retrieved coach ID:', coachId);
-
-                // Get source and destination station IDs
-                db.query(
-                    'SELECT StationID FROM Station WHERE StationName = ?',
-                    [sourceStation],
-                    (err, sourceStationResult) => {
-                        if (err) {
-                            db.rollback(() => {
-                                console.error('Error getting source station:', err);
-                                res.status(500).json({
-                                    success: false,
-                                    message: 'Error retrieving source station information'
-                                });
-                            });
-                            return;
-                        }
-
-                        if (!sourceStationResult || sourceStationResult.length === 0) {
-                            db.rollback(() => {
-                                res.status(400).json({
-                                    success: false,
-                                    message: 'Invalid source station'
-                                });
-                            });
-                            return;
-                        }
-
-                        const sourceStationId = sourceStationResult[0].StationID;
-
-                        db.query(
-                            'SELECT StationID FROM Station WHERE StationName = ?',
-                            [destinationStation],
-                            (err, destStationResult) => {
-                                if (err) {
-                                    db.rollback(() => {
-                                        console.error('Error getting destination station:', err);
-                                        res.status(500).json({
-                                            success: false,
-                                            message: 'Error retrieving destination station information'
-                                        });
-                                    });
-                                    return;
-                                }
-
-                                if (!destStationResult || destStationResult.length === 0) {
-                                    db.rollback(() => {
-                                        res.status(400).json({
-                                            success: false,
-                                            message: 'Invalid destination station'
-                                        });
-                                    });
-                                    return;
-                                }
-
-                                const destStationId = destStationResult[0].StationID;
-
-                                // Check available seats
-                                db.query(
-                                    'SELECT AvailableSeats FROM TrainAvailability WHERE TrainID = ? AND TravelDate = ? AND CoachID = ?',
-                                    [trainId, travelDate, coachId],
-                                    (err, availability) => {
-                                        if (err) {
-                                            db.rollback(() => {
-                                                console.error('Error checking availability:', err);
-                                                res.status(500).json({
-                                                    success: false,
-                                                    message: 'Error checking seat availability'
-                                                });
-                                            });
-                                            return;
-                                        }
-
-                                        // First check if we have a record
-                                        if (!availability || availability.length === 0) {
-                                            // Try to create a new availability record if none exists
-                                            db.query(
-                                                'INSERT INTO TrainAvailability (TrainID, TravelDate, CoachID, AvailableSeats) VALUES (?, ?, ?, 11)',
-                                                [trainId, travelDate, coachId],
-                                                (err, result) => {
-                                                    if (err) {
-                                                        db.rollback(() => {
-                                                            console.error('Error creating availability record:', err);
-                                                            res.status(500).json({
-                                                                success: false,
-                                                                message: 'Error creating availability record'
-                                                            });
-                                                        });
-                                                        return;
-                                                    }
-                                                    
-                                                    const availableSeats = 11;
-                                                    processBookingWithSeats(coachId, sourceStationId, destStationId, availableSeats);
-                                                }
-                                            );
-                                        } else {
-                                            const availableSeats = availability[0].AvailableSeats;
-                                            processBookingWithSeats(coachId, sourceStationId, destStationId, availableSeats);
-                                        }
-                                    }
-                                );
-                            }
-                        );
-                    }
-                );
-            }
-        );
-    });
-
-    function processBookingWithSeats(coachId, sourceStationId, destStationId, availableSeats) {
-        // Insert transaction record
-        db.query(
-            'INSERT INTO Transactions (TransactionID, LoginID, PaymentMean, Amount) VALUES (NULL, ?, ?, ?)',
-            [loginId, paymentMethod, totalAmount],
-            (err, transactionResult) => {
-                if (err) {
-                    db.rollback(() => {
-                        console.error('Error creating transaction:', err);
-                        res.status(500).json({
-                            success: false,
-                            message: 'Error creating transaction record'
-                        });
-                    });
-                    return;
-                }
-
-                const transactionId = transactionResult.insertId;
-                const confirmedSeats = Math.min(availableSeats, passengers.length);
-                const waitlistedSeats = Math.max(0, passengers.length - availableSeats);
-
-                // Process each passenger
-                let processedPassengers = 0;
-                let hasError = false;
-
-                passengers.forEach((passenger, index) => {
-                    if (hasError) return;
-
-                    const isWaitlisted = index >= confirmedSeats;
-                    
-                    // Insert passenger record
-                    db.query(
-                        'INSERT INTO Passenger (LoginID, FirstName, LastName, AadharNO, Gender, Age, DOB) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                        [
-                            loginId,
-                            passenger.firstName,
-                            passenger.lastName,
-                            passenger.aadharNo,
-                            passenger.gender,
-                            passenger.age,
-                            passenger.dob
-                        ],
-                        (err, passengerResult) => {
-                            if (err) {
-                                hasError = true;
-                                db.rollback(() => {
-                                    console.error('Error creating passenger:', err);
-                                    res.status(500).json({
-                                        success: false,
-                                        message: 'Error creating passenger record'
-                                    });
-                                });
-                                return;
-                            }
-
-                            const passengerId = passengerResult.insertId;
-
-                            // Insert booking record
-                            db.query(
-                                'INSERT INTO Booking (TransactionID, PassengerID, TrainID, LoginID, CoachID, BookingDate, BookingStatus, RefundStatus, Source, TravelDate, Destination) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?)',
-                                [
-                                    transactionId,
-                                    passengerId,
-                                    trainId,
-                                    loginId,
-                                    coachId,
-                                    isWaitlisted ? 'WAITING' : 'CONFIRMED',
-                                    'Not requested',
-                                    sourceStationId,
-                                    travelDate,
-                                    destStationId
-                                ],
-                                (err, bookingResult) => {
-                                    if (err) {
-                                        hasError = true;
-                                        db.rollback(() => {
-                                            console.error('Error creating booking:', err);
-                                            res.status(500).json({
-                                                success: false,
-                                                message: 'Error creating booking record'
-                                            });
-                                        });
-                                        return;
-                                    }
-
-                                    const ticketId = bookingResult.insertId;
-
-                                    // If waitlisted, insert into WaitingList table
-                                    if (isWaitlisted) {
-                                        // Get the next waiting ID for this train, coach, and travel date
-                                        db.query(
-                                            'SELECT COALESCE(MAX(WaitingID), 0) + 1 as nextWaitingId FROM WaitingList WHERE TrainID = ? AND CoachID = ? AND TravelDate = ?',
-                                            [trainId, coachId, travelDate],
-                                            (err, waitingIdResult) => {
-                                                if (err) {
-                                                    hasError = true;
-                                                    db.rollback(() => {
-                                                        console.error('Error getting next waiting ID:', err);
-                                                        res.status(500).json({
-                                                            success: false,
-                                                            message: 'Error getting waiting list ID'
-                                                        });
-                                                    });
-                                                    return;
-                                                }
-
-                                                const waitingId = waitingIdResult[0].nextWaitingId;
-
-                                                // Insert into WaitingList
-                                                db.query(
-                                                    'INSERT INTO WaitingList (WaitingID, PassengerID, TrainID, CoachID, TicketID, TravelDate) VALUES (?, ?, ?, ?, ?, ?)',
-                                                    [waitingId, passengerId, trainId, coachId, ticketId, travelDate],
-                                                    (err) => {
-                                                        if (err) {
-                                                            hasError = true;
-                                                            db.rollback(() => {
-                                                                console.error('Error creating waiting list entry:', err);
-                                                                res.status(500).json({
-                                                                    success: false,
-                                                                    message: 'Error creating waiting list entry'
-                                                                });
-                                                            });
-                                                            return;
-                                                        }
-
-                                                        processNextPassenger();
-                                                    }
-                                                );
-                                            }
-                                        );
-                                    } else {
-                                        processNextPassenger();
-                                    }
-                                }
-                            );
-                        }
-                    );
-                });
-
-                function processNextPassenger() {
-                    processedPassengers++;
-                    if (processedPassengers === passengers.length && !hasError) {
-                        // Update available seats only for confirmed bookings
-                        if (confirmedSeats > 0) {
-                            db.query(
-                                'UPDATE TrainAvailability SET AvailableSeats = AvailableSeats - ? WHERE TrainID = ? AND TravelDate = ? AND CoachID = ?',
-                                [confirmedSeats, trainId, travelDate, coachId],
-                                (err) => {
-                                    if (err) {
-                                        db.rollback(() => {
-                                            console.error('Error updating availability:', err);
-                                            res.status(500).json({
-                                                success: false,
-                                                message: 'Error updating seat availability'
-                                            });
-                                        });
-                                        return;
-                                    }
-                                    completeBooking();
-                                }
-                            );
-                        } else {
-                            completeBooking();
-                        }
-                    }
-                }
-
-                function completeBooking() {
-                    // Get train details for confirmation
-                    db.query(
-                        'SELECT t.TrainName, t.TrainID, c.CoachName, ta.AvailableSeats FROM Train t JOIN Coach c ON c.CoachID = ? JOIN TrainAvailability ta ON ta.TrainID = t.TrainID AND ta.CoachID = c.CoachID WHERE t.TrainID = ?',
-                        [coachId, trainId],
-                        (err, trainDetails) => {
-                            if (err) {
-                                db.rollback(() => {
-                                    console.error('Error getting train details:', err);
-                                    res.status(500).json({
-                                        success: false,
-                                        message: 'Error getting train details'
-                                    });
-                                });
-                                return;
-                            }
-
-                            // Commit transaction
-                            db.commit((err) => {
-                                if (err) {
-                                    db.rollback(() => {
-                                        console.error('Error committing transaction:', err);
-                                        res.status(500).json({
-                                            success: false,
-                                            message: 'Error finalizing booking'
-                                        });
-                                    });
-                                    return;
-                                }
-
-                                console.log('Booking completed successfully:', {
-                                    transactionId,
-                                    confirmedSeats,
-                                    waitlistedSeats
-                                });
-
-                                res.json({
-                                    success: true,
-                                    message: 'Tickets booked successfully',
-                                    transactionId: transactionId,
-                                    bookingDetails: {
-                                        passengers: passengers.map(p => ({
-                                            name: `${p.firstName} ${p.lastName}`,
-                                            aadhar: p.aadharNo,
-                                            age: p.age,
-                                            gender: p.gender
-                                        })),
-                                        train: trainDetails[0],
-                                        totalAmount,
-                                        paymentMethod,
-                                        travelDate,
-                                        sourceStation,
-                                        destinationStation,
-                                        confirmedSeats,
-                                        waitlistedSeats
-                                    }
-                                });
-                            });
-                        }
-                    );
-                }
-            }
-        );
-    }
+    res.json({ success: true, transactions: results });
+  });
 });
+
 
 // Start the server
 app.listen(PORT, () => {
