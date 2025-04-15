@@ -34,12 +34,11 @@ router.get('/:loginID', (req, res) => {
   SELECT 
     B.TransactionID, 
     T.TrainName, 
-    B.BookingDate AS BookingDate, 
-    B.BookingStatus 
+    B.BookingDate AS BookingDate
   FROM Booking B 
   NATURAL JOIN Train T
   WHERE B.LoginID = ? 
-  GROUP BY B.TransactionID, T.TrainName, B.BookingStatus, B.BookingDate
+  GROUP BY B.TransactionID, T.TrainName, B.BookingDate
   ORDER BY BookingDate DESC;
 `;
 
