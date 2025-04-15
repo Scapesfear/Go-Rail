@@ -94,42 +94,126 @@ function createPassengerForms() {
 }
 
 // Function to handle form submission
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
     e.preventDefault();
+    console.log('Form submitted');
+
+    // Get user's login ID from localStorage
+    const loginId = localStorage.getItem("loginID");
+    if (!loginId) {
+        alert('Please login to book tickets');
+        window.location.href = 'login.html';
+        return;
+    }
 
     // Collect all passenger details
     const passengers = [];
     for (let i = 1; i <= passengerCount; i++) {
+        const firstName = document.getElementById(`firstName${i}`).value;
+        const lastName = document.getElementById(`lastName${i}`).value;
+        const aadharNo = document.getElementById(`aadharNo${i}`).value;
+        const gender = document.getElementById(`gender${i}`).value;
+        const age = document.getElementById(`age${i}`).value;
+        const dob = document.getElementById(`dob${i}`).value;
+
+        if (!firstName || !lastName || !aadharNo || !gender || !age || !dob) {
+            alert(`Please fill in all details for Passenger ${i}`);
+            return;
+        }
+
         passengers.push({
-            firstName: document.getElementById(`firstName${i}`).value,
-            lastName: document.getElementById(`lastName${i}`).value,
-            aadharNo: document.getElementById(`aadharNo${i}`).value,
-            gender: document.getElementById(`gender${i}`).value,
-            age: document.getElementById(`age${i}`).value,
-            dob: document.getElementById(`dob${i}`).value
+            firstName,
+            lastName,
+            aadharNo,
+            gender,
+            age,
+            dob
         });
     }
 
+    // Get payment method
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    if (!paymentMethod) {
+        alert('Please select a payment method');
+        return;
+    }
+
+    // Calculate total amount
+    const totalAmount = train.Price * passengerCount;
+
     // Create booking data
     const bookingData = {
-        trainId,
-        sourceStation,
-        destinationStation,
-        journeyDate,
-        coachClass,
-        passengers,
-        paymentMethod: document.getElementById('paymentMethod').value
+        loginId: parseInt(loginId),
+        trainId: parseInt(trainId),
+        travelDate: journeyDate,
+        coachClass: coachClass,
+        paymentMethod: paymentMethod,
+        totalAmount: totalAmount,
+        passengers: passengers,
+        sourceStation: sourceStation,
+        destinationStation: destinationStation
     };
 
-    // Store booking data in localStorage
-    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+    console.log('Booking data:', bookingData);
 
-    // Redirect to payment page (to be implemented)
-    alert('Booking details saved. Payment integration to be implemented.');
+    try {
+        // Show loading state
+        const submitButton = document.querySelector('.book-tickets-btn');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        // Make API call to book tickets
+        const response = await fetch('http://localhost:3001/book-tickets', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingData)
+        });
+
+        console.log('Response status:', response.status);
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        if (result.success) {
+            // Store booking details in localStorage for confirmation page
+            localStorage.setItem('bookingConfirmation', JSON.stringify({
+                ...result.bookingDetails,
+                trainDetails: {
+                    trainName: train.TrainName,
+                    sourceStation: sourceStation,
+                    destinationStation: destinationStation,
+                    departureTime: train.DepartureTime,
+                    arrivalTime: train.ArrivalTime,
+                    coachClass: coachClass,
+                    price: train.Price
+                },
+                passengers: passengers,
+                travelDate: journeyDate,
+                totalAmount: totalAmount,
+                paymentMethod: paymentMethod,
+                transactionId: result.transactionId
+            }));
+            
+            // Redirect to confirmation page
+            window.location.href = 'booking_confirmation.html';
+        } else {
+            alert(result.message || 'Failed to book tickets');
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-ticket-alt"></i> Book Tickets';
+        }
+    } catch (error) {
+        console.error('Error booking tickets:', error);
+        alert('An error occurred while booking tickets. Please try again.');
+        const submitButton = document.querySelector('.book-tickets-btn');
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-ticket-alt"></i> Book Tickets';
+    }
 }
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded');
     if (!trainId || !sourceStation || !destinationStation || !journeyDate || !coachClass || !passengerCount) {
         alert('Invalid booking parameters. Please try again.');
         window.location.href = 'available_trains.html';
@@ -148,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!train) {
                 throw new Error('Train details not found');
             }
+            window.train = train; // Store train details globally
             displayTrainInfo(train);
             createPassengerForms();
         })
@@ -158,5 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Add form submit handler
-    document.getElementById('bookingForm').addEventListener('submit', handleFormSubmit);
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', handleFormSubmit);
+        console.log('Form submit handler added');
+    } else {
+        console.error('Booking form not found');
+    }
 }); 

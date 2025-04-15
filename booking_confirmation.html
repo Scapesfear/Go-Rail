@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoRail | Booking Confirmation</title>
+    <link rel="stylesheet" href="booking_confirmation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <div class="logo">GoRail</div>
+            <div class="user-greet" id="userGreet">Welcome back, Passenger</div>
+        </div>
+
+        <div class="main-content">
+            <div class="confirmation-container">
+                <div class="confirmation-header">
+                    <i class="fas fa-check-circle"></i>
+                    <h1>Booking Confirmed!</h1>
+                    <p>Your tickets have been successfully booked</p>
+                </div>
+
+                <div class="train-details">
+                    <h2>Journey Details</h2>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="label">Train Name</span>
+                            <span class="value" id="trainName"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Route</span>
+                            <span class="value" id="route"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Departure</span>
+                            <span class="value" id="departureTime"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Arrival</span>
+                            <span class="value" id="arrivalTime"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Date</span>
+                            <span class="value" id="travelDate"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Coach Class</span>
+                            <span class="value" id="coachClass"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="passengers-section">
+                    <h2>Passenger Details</h2>
+                    <div id="passengersList">
+                        <!-- Passenger details will be populated here -->
+                    </div>
+                </div>
+
+                <div class="payment-details">
+                    <h2>Payment Details</h2>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="label">Total Amount</span>
+                            <span class="value" id="totalAmount"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Payment Method</span>
+                            <span class="value" id="paymentMethod"></span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Transaction ID</span>
+                            <span class="value" id="transactionId"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="print-btn" onclick="window.print()">
+                        <i class="fas fa-print"></i>
+                        Print Tickets
+                    </button>
+                    <button class="home-btn" onclick="window.location.href='passenger_homescreen.html'">
+                        <i class="fas fa-home"></i>
+                        Go to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="booking_confirmation.js"></script>
+</body>
+</html> 
