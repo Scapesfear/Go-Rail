@@ -34,11 +34,6 @@
     color: #ff6b6b;
   }
   
-  #greeting {
-    font-size: 1.1rem;
-    color: #ddd;
-  }
-  
   table {
     width: 100%;
     border-collapse: collapse;
@@ -68,13 +63,6 @@
     background: #ffe8e8;
   }
   
-  .no-bookings {
-    text-align: center;
-    font-size: 1.2rem;
-    margin-top: 1rem;
-    display: none; /* will show via JS if needed */
-  }
-  
   .back {
     text-align: center;
     margin-top: 2rem;
@@ -93,31 +81,4 @@
   
   .back button:hover {
     background: #ff4b4b;
-  }
-  td button {
-    margin: 0 5px;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.3s ease;
-  }
-  
-  .view-btn {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .view-btn:hover {
-    background-color: #2980b9;
-  }
-  
-  .cancel-btn {
-    background-color: #e74c3c;
-    color: white;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #c0392b;
   }

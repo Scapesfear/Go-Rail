@@ -13,10 +13,14 @@ if (!loginID) {
 function createBookingRow(booking) {
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td>${booking.TicketID}</td>
+    <td>${booking.TransactionID}</td>
     <td>${booking.TrainName}</td>
     <td>${booking.BookingDate?.split('T')[0]}</td>
     <td>${booking.BookingStatus}</td>
+    <td>
+    <button class="view-btn" onclick="viewDetails('${booking.TransactionID}')">Show Details</button>
+    <button class="cancel-btn" onclick="cancelBooking('${booking.TicketID}')">Cancel</button>
+    </td>
   `;
   return tr;
 }
@@ -46,3 +50,11 @@ fetch(`http://localhost:3001/bookings/${loginID}`)
     console.error("Error fetching bookings:", error);
     alert("Failed to load your booking history. Please try again later.");
   });
+
+
+  function viewDetails(transactionID) {
+    // Store the transactionID in localStorage
+    localStorage.setItem('currentTransaction', transactionID);
+    // Redirect to details page
+    window.location.href = 'ticketDetails.html';
+  }

@@ -32,14 +32,15 @@ router.get('/:loginID', (req, res) => {
   const loginID = req.params.loginID;
   const query = `
   SELECT 
-    B.TicketID, 
+    B.TransactionID, 
     T.TrainName, 
     B.BookingDate AS BookingDate, 
     B.BookingStatus 
   FROM Booking B 
-  JOIN Train T ON B.TrainID = T.TrainID 
+  NATURAL JOIN Train T
   WHERE B.LoginID = ? 
-  ORDER BY B.BookingDate DESC
+  GROUP BY B.TransactionID, T.TrainName, B.BookingStatus, B.BookingDate
+  ORDER BY BookingDate DESC;
 `;
 
 
